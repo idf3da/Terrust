@@ -1,0 +1,15 @@
+[package]
+name = "cell3d"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.8", features = ["dynamic"] }
+rand = "*"
+bevy_flycam = "*"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+lto = "thin"

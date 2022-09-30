@@ -20,28 +20,9 @@ use bevy_flycam::{PlayerPlugin, MovementSettings};
 const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
 const SUN: Color = Color::rgb(0.992156, 0.721568, 0.074509);
 const S: u32 = 0;
-const SIZE: (u32, u32) = (2 << S, 2 << S);
+// const SIZE: (u32, u32) = (2 << S, 2 << S);
+const SIZE: (u32, u32) = (1, 1);
 const HALF_SIZE: f32 = 1.0;
-
-struct CubemapMaterial {
-	base_color_texture: Option<Handle<Image>>,
-}
-
-impl Material for CubemapMaterial {
-	fn fragment_shader() -> ShaderRef {
-		"shaders/cubemap_unlit.wgsl".into()
-	}
-
-	fn specialize(
-		_pipeline: &MaterialPipeline<Self>,
-		descriptor: &mut RenderPipelineDescriptor,
-		_layout: &MeshVertexBufferLayout,
-_key: MaterialPipelineKey<Self>,
-	) -> Result<(), SpecializedMeshPipelineError> {
-		descriptor.primitive.cull_mode = None;
-		Ok(())
-	}
-}
 
 fn main() {
 	App::new()
@@ -103,20 +84,12 @@ fn setup(
 			radius: 200.0,
 			subdivisions: 3,
 		})),
+
 		material: materials.add(StandardMaterial {
 			base_color: Color::rgb(1.0, 1.0, 1.0),
 			..default()
 		}),
 		
-	        ..Default::default()
-	});
-
-	commands.spawn(MaterialMeshBundle::<CubemapMaterial> {
-        	mesh: meshes.add(Mesh::from(shape::Cube { size: 10000.0 })),
-                material: cubemap_materials.add(CubemapMaterial {
-                	base_color_texture: Some(cubemap.image_handle.clone_weak()),
-                }),
-                ..default()
-            });
-	
+		..Default::default()
+	});	
 }

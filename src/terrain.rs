@@ -9,7 +9,7 @@ fn type_of<T>(_: T){
 
 pub fn generate_grid(size: (u32, u32)) -> Mesh {
 
-        println!("Grid of {} by {}", size.0, size.1);
+        println!("Generating grid {} by {} squares", size.0, size.1);
 
         let mut mesh = Mesh::new(bevy::render::mesh::PrimitiveTopology::TriangleList);
         let pos = generate_positions(size);
@@ -55,7 +55,8 @@ fn generate_positions(size: (u32, u32)) -> Vec<[f32; 3]> {
 		}
 	}
 
-        println!("Pos count: {}", vert.len());
+        println!("Generated {} by {} vertecies", (0..size.0+1).len(), (0..size.1+1).len());
+        println!("Vertex count: {}", vert.len());
 
 	return vert;
 }
@@ -72,9 +73,9 @@ fn generate_indicies(size: (u32, u32)) -> Vec<u32> {
                         idx[tris + 1] = vert + 1;
                         idx[tris + 2] = vert + size.1 + 1;
 
-                        idx[tris + 3] = vert + 1;
-                        idx[tris + 4] = vert + size.1 + 2;
-                        idx[tris + 5] = vert + size.1 + 1;
+                        idx[tris + 3] = vert + size.1 + 2;
+                        idx[tris + 4] = vert + size.1 + 1;
+                        idx[tris + 5] = vert + 1;
                         
                         vert += 1;
                         tris += 6;
@@ -88,41 +89,37 @@ fn generate_indicies(size: (u32, u32)) -> Vec<u32> {
         return idx;
 }
 
-// TODO: Some Vec to Vec
-
 fn generate_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f32; 3]> {
         let mut normals: Vec<[f32; 3]> = Vec::new();
         let mut A: [f32; 3];
         let mut B: [f32; 3];
         let mut C: [f32; 3];
         let mut D: [f32; 3];
-        let mut c = 0;
+
+        let mut c: u32 = 0;
+
+
         for i in 0..size.0 {
                 for j in 0..size.1 {
                         A = vec_sub(positions[(i + j * size.0) as usize], positions[(i + j * size.0 + 1) as usize]);
-                        B = vec_sub(positions[(i + j * size.0) as usize], positions[(i + (j + 1) * size.0) as usize]);
+                        B = vec_sub(positions[(i + j * size.0) as usize], positions[(i + (j + 1) * size.0 + 1) as usize]);
+                        C = vec_sub(positions[(i + j * size.0 + 1) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
+                        D = vec_sub(positions[(i + (j + 1) * size.0 + 1) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
 
-                        if (i + 1) + (j + 1) * size.0 != positions.len() as u32 {       
-                                C = vec_sub(positions[(i + j * size.0 + 1) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
-                                D = vec_sub(positions[(i + (j + 1) * size.0) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
-                        } else {
-                                C = [0.0, 0.0, 0.0];
-                                D = [0.0, 0.0, 0.0];
-                        }
-                        
                         normals.push(cross_prod(A, B));
                         normals.push(cross_prod(C, D));
-
-                        c += 2;
+                        c += 2;                        
                 }
         }
 
-        normals.push([0.0, 0.0, 0.0]);
-
-        println!("Normal count: {}", c);
+        
+        println!("Normals: {}", normals.len());
 
         return normals;
 }
+
+// TODO: fn generate_smooth_normals()
+// https://computergraphics.stackexchange.com/questions/4031/programmatically-generating-vertex-normals
 
 fn vec_sub(A: [f32; 3], B: [f32; 3]) -> [f32; 3] {
         return [B[0] - A[0], B[1] - A[1], B[2] - A[2]];        

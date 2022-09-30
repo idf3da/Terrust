@@ -16,7 +16,8 @@ pub fn generate_grid(size: (u32, u32)) -> Mesh {
 
         mesh.set_indices(Some(bevy::render::mesh::Indices::U32(generate_indicies(size))));
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos.clone());
-        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_normals(size, pos.clone()));
+        // mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_normals(size, pos.clone()));
+        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_smooth_normals(size, pos.clone()));
         // mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, vec![[1.0, 1.0]; ((size.0 + 1) * (size.1 + 1)) as usize]);
 
         return mesh;
@@ -99,22 +100,88 @@ fn generate_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f32; 3]>
         let mut c: u32 = 0;
 
 
-        for i in 0..size.0 {
-                for j in 0..size.1 {
-                        A = vec_sub(positions[(i + j * size.0) as usize], positions[(i + j * size.0 + 1) as usize]);
-                        B = vec_sub(positions[(i + j * size.0) as usize], positions[(i + (j + 1) * size.0 + 1) as usize]);
-                        C = vec_sub(positions[(i + j * size.0 + 1) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
-                        D = vec_sub(positions[(i + (j + 1) * size.0 + 1) as usize], positions[((i + 1) + (j + 1) * size.0) as usize]);
+        for i in 0..size.0+1 {
+                for j in 0..size.1+1 {
+                        let mut A: [f32; 3] = [0.0, 0.0, 0.0];
+                        let mut B: [f32; 3] = [0.0, 0.0, 0.0];
+                        
+                        // println!("{}x{}", i, j);
 
+                        if j == size.1 {
+                                A = vec_sub(positions[(i + j * size.0) as usize], positions[(i + j * size.0 - 1) as usize]); 
+                        }
+                        
+                        if i == size.0 {
+                                B = vec_sub(positions[(i + j * size.0) as usize], positions[(i + (j + 0) * size.0 + 1) as usize]);  
+                        } else {
+                                A = vec_sub(positions[(i + j * size.0) as usize], positions[(i + j * size.0 + 1) as usize]);
+                                B = vec_sub(positions[(i + j * size.0) as usize], positions[(i + (j + 1) * size.0 + 1) as usize]);
+                        }
+                        
                         normals.push(cross_prod(A, B));
-                        normals.push(cross_prod(C, D));
-                        c += 2;                        
+                        c += 1;
                 }
         }
 
-        
+
         println!("Normals: {}", normals.len());
 
+        return normals;
+}
+
+fn generate_smooth_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f32; 3]> {
+        let mut normals: Vec<[f32; 3]> = Vec::new();
+        let mut O: [f32; 3];
+        let mut A: [f32; 3];
+        let mut B: [f32; 3];
+        let mut C: [f32; 3];
+        let mut D: [f32; 3];
+
+        let mut tr1: [f32; 3];
+
+        let mut c: u32 = 0;
+        
+        
+        for i in 0..size.0+1 {
+                for j in 0..size.1+1 {                        
+                        // println!("{}x{}", i, j);
+
+                        O = positions[(i * (size.0 + 1) + j) as usize];
+
+                        if i == 0 {
+                                A = O
+                        } else {
+                                A = positions[((i - 1) * (size.0 + 1) + j) as usize];
+                        }
+        
+                        if j == 0 {
+                                D = O
+                        } else {
+                                D = positions[(i * (size.0 + 1) + j - 1) as usize];
+                        }
+                        
+                        
+                        if i == size.0 {
+                                C = O
+                        } else {                                
+                                C = positions[((i + 1) * (size.0 + 1) + j) as usize];
+                        }
+                        
+                        if j == size.1 {
+                                B = O
+                        } else {                                
+                                B = positions[(i * (size.0 + 1) + j + 1) as usize];
+                        }
+
+                        
+                        normals.push(vec_wt_avg(O, A, B, C, D));
+                        c += 1;
+                }
+        }
+        
+        
+        println!("Normals: {}", normals.len());
+        
         return normals;
 }
 
@@ -125,6 +192,58 @@ fn vec_sub(A: [f32; 3], B: [f32; 3]) -> [f32; 3] {
         return [B[0] - A[0], B[1] - A[1], B[2] - A[2]];        
 }
 
+fn vec_add(A: [f32; 3], B: [f32; 3]) -> [f32; 3] {
+        return [B[0] + A[0], B[1] + A[1], B[2] + A[2]];        
+}
+
 fn cross_prod (A: [f32; 3], B: [f32; 3]) -> [f32; 3] {
         return [A[1]*B[2] - A[2]*B[1], A[2]*B[0]-A[0]*B[2], A[0]*B[1]-A[1]*B[0]];
+}
+
+fn vec_wt_avg(O: [f32; 3], A: [f32; 3], B: [f32; 3], C: [f32; 3], D: [f32; 3]) -> [f32; 3] {
+        let mut final_vec: [f32; 3] = [0.0, 0.0, 0.0];
+
+        let a = vec_norm(vec_sub(O, A));
+        let b = vec_norm(vec_sub(O, B));
+        let c = vec_norm(vec_sub(O, C));
+        let d = vec_norm(vec_sub(O, D));
+        
+        let area1 = tr_area(a, b);
+        let area2 = tr_area(b, c);
+        let area3 = tr_area(c, d);
+        let area4 = tr_area(d, a);
+
+        let tr1 = cross_prod(A, B);
+        let tr2 = cross_prod(B, C);
+        let tr3 = cross_prod(C, D);
+        let tr4 = cross_prod(D, A);
+
+        final_vec = vec_add(final_vec, vec_scale(tr1, area1));
+        final_vec = vec_add(final_vec, vec_scale(tr2, area2));
+        final_vec = vec_add(final_vec, vec_scale(tr3, area3));
+        final_vec = vec_add(final_vec, vec_scale(tr4, area4));
+
+        final_vec = vec_scale(final_vec, 1.0/(area1 + area2 + area3 + area4));
+
+        return final_vec
+}
+
+fn tr_area(A: [f32; 3], B: [f32; 3]) -> f32 {
+        return 0.5*( (A[1]*B[2] - A[2]*B[1]).powi(2) + (A[2]*B[0] - A[0]*B[2]).powi(2) + (A[0]*B[1] - A[1]*B[0]).powi(2) ).powi(1/2);
+}
+
+fn vec_mag(V: [f32; 3]) -> f32 {
+        return (V[0].powi(2) + V[1].powi(2) + V[2].powi(2)).powi(1/2).abs()
+}
+
+fn vec_scale(V: [f32; 3], S: f32) -> [f32; 3] {
+        let mut v: [f32; 3] = [0.0, 0.0, 0.0];
+        v[0] = V[0] * S;
+        v[1] = V[1] * S;
+        v[2] = v[2] * S;
+        return v
+}
+
+fn vec_norm(V: [f32; 3]) -> [f32; 3] {
+        return vec_scale(V, vec_mag(V));
 }

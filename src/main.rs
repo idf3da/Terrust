@@ -19,9 +19,9 @@ use bevy_flycam::{PlayerPlugin, MovementSettings};
 
 const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
 const SUN: Color = Color::rgb(0.992156, 0.721568, 0.074509);
-const S: u32 = 0;
-// const SIZE: (u32, u32) = (2 << S, 2 << S);
-const SIZE: (u32, u32) = (1, 1);
+const S: u32 = 9;
+const SIZE: (u32, u32) = (2 << S, 2 << S);
+// const SIZE: (u32, u32) = (2, 2);
 const HALF_SIZE: f32 = 1.0;
 
 fn main() {
@@ -54,7 +54,7 @@ fn setup(
 	mut meshes: ResMut<Assets<Mesh>>,
 	mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-	wireframe_config.global = true;
+	wireframe_config.global = false;
 
 	commands.spawn_bundle(DirectionalLightBundle {
 		directional_light: DirectionalLight {

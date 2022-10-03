@@ -187,7 +187,6 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fea147ef1ebb92d41294cfad804c40de151b174c711ce6e0a4a40eba23eae1a4"
 dependencies = [
- "bevy_dylib",
  "bevy_internal",
 ]
 
@@ -250,6 +249,15 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "bevy_atmosphere"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7eefd3b2c389c6b5cbf42b97e62a22386488c9fbcebbc441ec21f2bc4b2a61e1"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
@@ -323,15 +331,6 @@ dependencies = [
  "bevy_log",
  "bevy_time",
  "bevy_utils",
-]
-
-[[package]]
-name = "bevy_dylib"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b9ac2612b037838ab2ded3222a21ef56c36a1e0f04e6be97493d4532972f32b"
-dependencies = [
- "bevy_internal",
 ]
 
 [[package]]
@@ -940,6 +939,7 @@ name = "cell3d"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_atmosphere",
  "bevy_flycam",
  "noise",
  "rand 0.8.5",
@@ -3375,7 +3375,7 @@ dependencies = [
  "js-sys",
  "log",
  "naga",
- "parking_lot 0.11.2",
+ "parking_lot 0.12.1",
  "raw-window-handle",
  "smallvec",
  "wasm-bindgen",
@@ -3401,7 +3401,7 @@ dependencies = [
  "fxhash",
  "log",
  "naga",
- "parking_lot 0.11.2",
+ "parking_lot 0.12.1",
  "profiling",
  "raw-window-handle",
  "smallvec",
@@ -3438,7 +3438,7 @@ dependencies = [
  "metal",
  "naga",
  "objc",
- "parking_lot 0.11.2",
+ "parking_lot 0.12.1",
  "profiling",
  "range-alloc",
  "raw-window-handle",

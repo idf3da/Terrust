@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 // use rand::Rng;
 use noise::{NoiseFn, Perlin};
+use bevy::render::mesh::VertexAttributeValues;
 
 fn type_of<T>(_: T){
 	println!("{}", std::any::type_name::<T>());
@@ -12,7 +13,7 @@ pub fn generate_grid(size: (u32, u32)) -> Mesh {
         println!("Generating grid {} by {} squares", size.0, size.1);
 
         let mut mesh = Mesh::new(bevy::render::mesh::PrimitiveTopology::TriangleList);
-        let pos = generate_positions(size);
+        let pos = generate_verts(size);
 
         mesh.set_indices(Some(bevy::render::mesh::Indices::U32(generate_indicies(size))));
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos.clone());
@@ -23,7 +24,7 @@ pub fn generate_grid(size: (u32, u32)) -> Mesh {
         return mesh;
 }
 
-fn generate_positions(size: (u32, u32)) -> Vec<[f32; 3]> {
+fn generate_verts(size: (u32, u32)) -> Vec<[f32; 3]> {
 	let mut vert: Vec<[f32; 3]> = Vec::new();
         let mut rng = rand::thread_rng();
         let perlin = Perlin::new(); // TODO: Rewrite cuz min and max are capped?
@@ -236,12 +237,19 @@ fn vec_mag(V: [f32; 3]) -> f32 {
         return (V[0].powi(2) + V[1].powi(2) + V[2].powi(2)).powi(1/2).abs()
 }
 
-fn vec_scale(V: [f32; 3], S: f32) -> [f32; 3] {
+pub fn vec_scale(V: [f32; 3], S: f32) -> [f32; 3] {
         let mut v: [f32; 3] = [0.0, 0.0, 0.0];
         v[0] = V[0] * S;
         v[1] = V[1] * S;
         v[2] = v[2] * S;
         return v
+}
+
+pub fn inv_norm(V: std::option::Option<&VertexAttributeValues>) -> std::option::Option<&VertexAttributeValues> {
+        let mut final_vec: [f32; 3];
+        for i in V.iter() {
+                final_vec.push(i.as_float3())
+        }
 }
 
 fn vec_norm(V: [f32; 3]) -> [f32; 3] {

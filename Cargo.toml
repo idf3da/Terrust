@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.8", features = ["dynamic"] }
+bevy = "*"
 rand = "*"
 bevy_flycam = "*"
 noise = "0.7.0"
+bevy_atmosphere = "*"
 
 [profile.dev]
 opt-level = 0

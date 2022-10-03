@@ -15,17 +15,20 @@ use bevy::{
 	},
 };
 use bevy_flycam::{PlayerPlugin, MovementSettings};
+use bevy_atmosphere::prelude::*;
 
 
 const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
 const SUN: Color = Color::rgb(0.992156, 0.721568, 0.074509);
-const S: u32 = 9;
+const S: u32 = 5;
 const SIZE: (u32, u32) = (2 << S, 2 << S);
 // const SIZE: (u32, u32) = (2, 2);
 const HALF_SIZE: f32 = 1.0;
 
 fn main() {
 	App::new()
+		.add_plugins(DefaultPlugins)
+		// .add_plugins(AtmospherePlugin)
 		.insert_resource(ClearColor(CLEAR))
 		.insert_resource(WindowDescriptor {
 			height: 800.0,
@@ -37,7 +40,6 @@ fn main() {
 			features: WgpuFeatures::POLYGON_MODE_LINE,
 			..default()
 		})
-		.add_plugins(DefaultPlugins)
 		.add_plugin(WireframePlugin)
 		.add_plugin(PlayerPlugin)
 		.insert_resource(MovementSettings {
@@ -52,8 +54,10 @@ fn setup(
 	mut commands: Commands,
 	mut wireframe_config: ResMut<WireframeConfig>,
 	mut meshes: ResMut<Assets<Mesh>>,
+	asset_server: Res<AssetServer>,
 	mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+	let texture_handle = asset_server.load("textures/sky.png");
 	wireframe_config.global = false;
 
 	commands.spawn_bundle(DirectionalLightBundle {
@@ -67,21 +71,24 @@ fn setup(
 	});
 
 
+	// Terrain grid
 	commands.spawn_bundle(PbrBundle {
 		transform: Transform::from_scale(Vec3::splat(75.0)),
 
 		mesh: meshes.add(terrain::generate_grid(SIZE)),
 		material: materials.add(StandardMaterial {
 			base_color: Color::rgb(1.0, 1.0, 1.0),
+			metallic: 0.0,
 			..default()
 		}),
 		..Default::default()
 	});
 
+	// Orientation sphere
 	commands.spawn_bundle(PbrBundle {
 		transform: Transform::from_translation(Vec3::new(40000.0, 2000.0,40000.0)),
 		mesh: meshes.add(Mesh::from(shape::Icosphere {
-			radius: 200.0,
+			radius: 2000.0,
 			subdivisions: 3,
 		})),
 
@@ -89,7 +96,35 @@ fn setup(
 			base_color: Color::rgb(1.0, 1.0, 1.0),
 			..default()
 		}),
-		
 		..Default::default()
-	});	
+	});
+
+	
+	let skybox_box = meshes.add(Mesh::from(shape::Icosphere {
+		radius: 2000.0,
+		subdivisions: 3,
+	}));
+
+	println!("Normals: {:?}", terrain::inv_norm(Mesh::from(shape::Icosphere {
+		radius: 2000.0,
+		subdivisions: 3,
+	}).attribute(Mesh::ATTRIBUTE_NORMAL)));
+
+
+	// this material renders the texture normally
+	let material_handle = materials.add(StandardMaterial {
+		base_color_texture: Some(texture_handle.clone()),
+		alpha_mode: AlphaMode::Blend,
+		unlit: true,
+		..default()
+	});
+
+	// textured quad - normal
+	commands.spawn_bundle(PbrBundle {
+		mesh: skybox_box.clone(),
+		// transform: Transform::from_scale(Vec3::splat(100.0)),
+		material: material_handle,
+		..default()
+	});
+
 }

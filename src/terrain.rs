@@ -245,11 +245,14 @@ pub fn vec_scale(V: [f32; 3], S: f32) -> [f32; 3] {
         return v
 }
 
-pub fn inv_norm(V: std::option::Option<&VertexAttributeValues>) -> std::option::Option<&VertexAttributeValues> {
-        let mut final_vec: [f32; 3];
-        for i in V.iter() {
-                final_vec.push(i.as_float3())
+pub fn inv_vec(V: Vec<[f32; 3]>) -> Vec<[f32; 3]> {
+        let mut final_vec: Vec<[f32; 3]> = Vec::new();
+
+        for v in V {
+                final_vec.push(vec_scale(v, -1.0))
         }
+        
+        return final_vec
 }
 
 fn vec_norm(V: [f32; 3]) -> [f32; 3] {

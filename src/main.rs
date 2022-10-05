@@ -100,15 +100,18 @@ fn setup(
 	});
 
 	
-	let skybox_box = meshes.add(Mesh::from(shape::Icosphere {
+	let skybox_mesh = Mesh::from(shape::Icosphere {
 		radius: 2000.0,
 		subdivisions: 3,
-	}));
+	});
 
-	println!("Normals: {:?}", terrain::inv_norm(Mesh::from(shape::Icosphere {
-		radius: 2000.0,
-		subdivisions: 3,
-	}).attribute(Mesh::ATTRIBUTE_NORMAL)));
+
+	// TODO: This
+	// expected struct `Vec<[f32; 3]>`
+    	// 	found slice `[[f32; 3]]`rustcE0308
+	
+	skybox_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, terrain::inv_vec((*skybox_mesh.attribute(Mesh::ATTRIBUTE_NORMAL).unwrap().as_float3().unwrap())));
+	let skybox_box = meshes.add(skybox_mesh);
 
 
 	// this material renders the texture normally

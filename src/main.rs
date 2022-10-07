@@ -1,39 +1,33 @@
 mod terrain;
+mod meshgen;
+mod mathop;
 
 use bevy::{
-	pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin},
-	pbr::{MaterialPipeline, MaterialPipelineKey},
+	pbr::wireframe::{WireframeConfig, WireframePlugin},
 	prelude::*,
 	render::{
-		mesh::MeshVertexBufferLayout,
 		render_resource::{
 			WgpuFeatures,
-			RenderPipelineDescriptor,
-			ShaderRef,
 		}, 
 		settings::WgpuSettings,
 	},
 };
 use bevy_flycam::{PlayerPlugin, MovementSettings};
-use bevy_atmosphere::prelude::*;
 
 
 const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
-const SUN: Color = Color::rgb(0.992156, 0.721568, 0.074509);
-const S: u32 = 5;
+const S: u32 = 8;
 const SIZE: (u32, u32) = (2 << S, 2 << S);
 // const SIZE: (u32, u32) = (2, 2);
-const HALF_SIZE: f32 = 1.0;
 
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
-		// .add_plugins(AtmospherePlugin)
 		.insert_resource(ClearColor(CLEAR))
 		.insert_resource(WindowDescriptor {
 			height: 800.0,
 			width: 600.0,
-			title: "3D".to_string(),
+			title: "Terrust 1.0".to_string(),
 			..default()
 		})
 		.insert_resource(WgpuSettings {
@@ -46,6 +40,7 @@ fn main() {
 			sensitivity: 0.0002,
 			speed: 4096.0,
 		})
+		// .add_system(fade_transparency)
 		.add_startup_system(setup)
 		.run();
 }
@@ -60,6 +55,7 @@ fn setup(
 	let texture_handle = asset_server.load("textures/sky.png");
 	wireframe_config.global = false;
 
+	// Global light
 	commands.spawn_bundle(DirectionalLightBundle {
 		directional_light: DirectionalLight {
 			illuminance: 30000.0,
@@ -70,51 +66,33 @@ fn setup(
 		..default()
 	});
 
-
-	// Terrain grid
+	
+	// Terrain mesh
 	commands.spawn_bundle(PbrBundle {
-		transform: Transform::from_scale(Vec3::splat(75.0)),
+		transform: Transform::from_scale(Vec3::splat(100.0)),
+		mesh: meshes.add(meshgen::gen_ter_mesh(SIZE)),
 
-		mesh: meshes.add(terrain::generate_grid(SIZE)),
 		material: materials.add(StandardMaterial {
 			base_color: Color::rgb(1.0, 1.0, 1.0),
-			metallic: 0.0,
+			metallic: 0.5,
 			..default()
 		}),
 		..Default::default()
 	});
 
-	// Orientation sphere
+	// Reference sphere
 	commands.spawn_bundle(PbrBundle {
 		transform: Transform::from_translation(Vec3::new(40000.0, 2000.0,40000.0)),
 		mesh: meshes.add(Mesh::from(shape::Icosphere {
 			radius: 2000.0,
 			subdivisions: 3,
 		})),
-
-		material: materials.add(StandardMaterial {
-			base_color: Color::rgb(1.0, 1.0, 1.0),
-			..default()
-		}),
 		..Default::default()
 	});
 
-	
-	let skybox_mesh = Mesh::from(shape::Icosphere {
-		radius: 2000.0,
-		subdivisions: 3,
-	});
+	let skybox_box = meshes.add(meshgen::gen_skybox());
 
-
-	// TODO: This
-	// expected struct `Vec<[f32; 3]>`
-    	// 	found slice `[[f32; 3]]`rustcE0308
-	
-	skybox_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, terrain::inv_vec((*skybox_mesh.attribute(Mesh::ATTRIBUTE_NORMAL).unwrap().as_float3().unwrap())));
-	let skybox_box = meshes.add(skybox_mesh);
-
-
-	// this material renders the texture normally
+	// Skybox material
 	let material_handle = materials.add(StandardMaterial {
 		base_color_texture: Some(texture_handle.clone()),
 		alpha_mode: AlphaMode::Blend,
@@ -122,12 +100,37 @@ fn setup(
 		..default()
 	});
 
-	// textured quad - normal
+	// Skybox
 	commands.spawn_bundle(PbrBundle {
 		mesh: skybox_box.clone(),
-		// transform: Transform::from_scale(Vec3::splat(100.0)),
+		transform: Transform::from_xyz(0.0, 0.0, 0.0).with_rotation(Quat::from_rotation_x(std::f32::consts::PI / 2.0)),
 		material: material_handle,
 		..default()
 	});
 
+	// Water plane
+	commands.spawn_bundle(PbrBundle {
+		mesh: meshes.add(Mesh::from(shape::Plane {
+			size: 1000000.0,
+		})),
+		material: materials.add(StandardMaterial {
+			base_color: Color::rgba(0.35, 0.55, 0.95, 0.7),
+		
+			alpha_mode: AlphaMode::Blend,
+			unlit: true,
+			..default()
+		}),
+		transform: Transform::from_xyz(10000.0, -7000.0, 15000.0),
+		..default()
+	});
+	
+
+
 }
+
+// pub fn fade_transparency(time: Res<Time>, mut materials: ResMut<Assets<StandardMaterial>>) {
+// 	let alpha = (time.time_since_startup().as_secs_f32().sin() / 2.0) + 0.5;
+// 	for (_, material) in materials.iter_mut() {
+// 		material.base_color.set_a(alpha);
+// 	}
+// }

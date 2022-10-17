@@ -19,16 +19,15 @@ pub fn gen_skybox() -> bevy::prelude::Mesh {
 	return skybox_mesh
 }
 
-pub fn gen_ter_mesh(size: (u32, u32)) -> Mesh {
+pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32)) -> Mesh {
         println!("Generating grid {} by {} squares", size.0, size.1);
 
         let mut mesh = Mesh::new(bevy::render::mesh::PrimitiveTopology::TriangleList);
-        let pos = gen_perlin(size);
+        let pos = gen_perlin(size, pos);
         mesh.set_indices(Some(bevy::render::mesh::Indices::U32(generate_indicies(size))));
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos.clone());
         // mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_normals(size, pos.clone()));
         mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_smooth_normals(size, pos.clone()));
-        // mesh.insert_attribute(Mesh::aTTRIbUTE_UV_0, vec![[1.0, 1.0]; ((size.0 + 1) * (size.1 + 1)) as usize]);
 
         if let Some(VertexAttributeValues::Float32x3(positions)) = mesh.attribute(Mesh::ATTRIBUTE_POSITION) {
 	        let colors: Vec<[f32; 4]> = positions
@@ -41,13 +40,21 @@ pub fn gen_ter_mesh(size: (u32, u32)) -> Mesh {
         return mesh;
 }
 
-fn color_height(x: f32, y: f32, z: f32) -> [f32; 4] {
+fn color_height(_x: f32, y: f32, _: f32) -> [f32; 4] {
         // println!("{}, {}, {}", x, y, z);
         let mut c = [0.5, 0.5, 0.5, 1.0];
 
-        if y > 50.0 {
+        if y > 75.0 {
                 c = [1.0, 1.0, 1.0, 1.0]
+        } else if y > 10.0 {
+                c = [0.3, 1.0, 0.3, 1.0]       
+        } else if y > 0.0 {
+                c = [0.76, 0.7, 0.5, 1.0]
+        } else {
+                c = [0.5, 0.5, 0.5, 1.0]
         }
+
+
 
         return c
 }

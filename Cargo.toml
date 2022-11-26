@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 bevy = "*"
+bevy_egui = "*"
 rand = "*"
 bevy_flycam = "*"
-noise = "0.7.0"
+noise = "0.7"
 bevy_atmosphere = "*"
 
 [profile.dev]

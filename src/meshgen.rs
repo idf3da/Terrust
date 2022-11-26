@@ -20,7 +20,6 @@ pub fn gen_skybox() -> bevy::prelude::Mesh {
 }
 
 pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32)) -> Mesh {
-        println!("Generating grid {} by {} squares", size.0, size.1);
 
         let mut mesh = Mesh::new(bevy::render::mesh::PrimitiveTopology::TriangleList);
         let pos = gen_perlin(size, pos);
@@ -30,7 +29,7 @@ pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32)) -> Mesh {
         mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_smooth_normals(size, pos.clone()));
 
         if let Some(VertexAttributeValues::Float32x3(positions)) = mesh.attribute(Mesh::ATTRIBUTE_POSITION) {
-	        let colors: Vec<[f32; 4]> = positions
+                let colors: Vec<[f32; 4]> = positions
 			.iter()
 			.map(|[x, y, z] | color_height(*x, *y, *z))
 			.collect();
@@ -41,10 +40,9 @@ pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32)) -> Mesh {
 }
 
 fn color_height(_x: f32, y: f32, _: f32) -> [f32; 4] {
-        // println!("{}, {}, {}", x, y, z);
         let mut c = [0.5, 0.5, 0.5, 1.0];
 
-        if y > 75.0 {
+        if y > 50.0 {
                 c = [1.0, 1.0, 1.0, 1.0]
         } else if y > 10.0 {
                 c = [0.3, 1.0, 0.3, 1.0]       
@@ -82,8 +80,6 @@ fn generate_indicies(size: (u32, u32)) -> Vec<u32> {
                 vert += 1
         }
 
-        println!("Idx count: {}", idx.len());
-
         return idx;
 }
 
@@ -96,8 +92,7 @@ fn generate_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f32; 3]>
         for i in 0..size.0+1 {
                 for j in 0..size.1+1 {
                         a = [0.0, 0.0, 0.0];
-                        
-                        // println!("{}x{}", i, j);
+                
 
                         if j == size.1 {
                                 a = vec_sub(positions[(i + j * size.0) as usize], positions[(i + j * size.0 - 1) as usize]); 
@@ -115,8 +110,6 @@ fn generate_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f32; 3]>
         }
 
 
-        println!("Normals: {}", normals.len());
-
         return normals;
 }
 
@@ -131,7 +124,6 @@ fn generate_smooth_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f
         
         for i in 0..size.0+1 {
                 for j in 0..size.1+1 {                        
-                        // println!("{}x{}", i, j);
 
                         o = positions[(i * (size.0 + 1) + j) as usize];
 
@@ -166,7 +158,7 @@ fn generate_smooth_normals(size: (u32, u32), positions: Vec<[f32; 3]>) -> Vec<[f
         }
         
         
-        println!("Normals: {}", normals.len());
+        // println!("Normals: {}", normals.len());
         
         return normals;
 }

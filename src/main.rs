@@ -29,10 +29,10 @@ use bevy_egui::{EguiPlugin};
 const CAMERA_TARGET: Vec3 = Vec3::ZERO;
 struct OriginalCameraTransform(Transform);
 
-const S: u32 = 1;
+const S: u32 = 9;
 const CHUNK_RES: (u32, u32) = (2 << S, 2 << S);
 const CHUNK_MAX_NUM: (u32, u32) = (1024, 1024);
-const SCALE: f32 = 300.0;
+const SCALE: f32 = (S * S * 100) as f32;
 const RENDER_DISTANCE: u32 = 16;
 const PERLIN_HEIGHT_SCALE: f64 = 40.0;
 const PERLIN_FREQ: f64 = 0.0009765625 * 8.0;
@@ -60,7 +60,7 @@ fn main() {
 		.add_plugin(PlayerPlugin)
 		.insert_resource(MovementSettings {
 			sensitivity: 0.0002,
-			speed: 1500.0,
+			speed: 1400.0,
 		})
 		// .add_startup_system(spawn_viewport)
 		.add_startup_system(basic_scene)

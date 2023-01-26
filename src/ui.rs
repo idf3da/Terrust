@@ -44,21 +44,21 @@ pub fn ui_example_system(
                         }
                 });
 
-                ui.add(egui::Slider::new(&mut ui_state.render_distance, 4..=64).text("Render distance (chunks)"));
+                ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=64).text("Render distance (chunks)"));
                 if ui.button("Increment").clicked() {
                         ui_state.render_distance += 1;
                 }
 
-                ui.allocate_space(egui::Vec2::new(1.0, 100.0));
+                ui.allocate_space(egui::Vec2::new(0.0, 50.0));
                 
                 ui.horizontal(|ui| {
-                        ui.label("Write something: ");
+                        ui.label("File Name: ");
                         ui.text_edit_singleline(&mut ui_state.label);
                 });
 
                 ui.horizontal(|ui| {
+                        ui.button("Save").clicked();
                         ui.button("Load").clicked();
-                        ui.button("Remove").clicked();
                 });
 
                 ui.checkbox(&mut ui_state.is_window_open, "Window Is Open");

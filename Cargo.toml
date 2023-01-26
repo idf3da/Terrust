@@ -10,9 +10,10 @@ rand = "*"
 bevy_flycam = "*"
 noise = "0.7"
 bevy_atmosphere = "*"
+meshx = "*"
 
 [profile.dev]
-opt-level = 0
+opt-level = 3
 
 [profile.release]
 lto = "thin"

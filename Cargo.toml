@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# bevy = { version = "*", features = ["wayland"] }
 bevy = "*"
 bevy_egui = "*"
 rand = "*"
@@ -13,7 +14,8 @@ bevy_atmosphere = "*"
 meshx = "*"
 
 [profile.dev]
-opt-level = 3
+opt-level = 0
 
 [profile.release]
 lto = "thin"
+opt-level = 3

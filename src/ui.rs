@@ -1,3 +1,5 @@
+use std::string;
+
 use bevy::{prelude::*, render::camera::Projection};
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use crate::chunk::*;
@@ -13,11 +15,10 @@ pub struct OriginalCameraTransform(Transform);
 
 #[derive(Default)]
 pub struct UiState {
-        label: String,
+        file_name: String,
         pub render_distance: u32,
-        inverted: bool,
+        pub int_location: (u32, u32),
         egui_texture_handle: Option<egui::TextureHandle>,
-        is_window_open: bool,
 }
 
 // TODO: When custom camera controls enable perspective shift
@@ -31,42 +32,52 @@ pub fn ui_example_system(
         mut is_initialized: Local<bool>,
         // mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
 ) {
-        // occupied_screen_space.left = egui::SidePanel::left("left_panel").resizable(true).show(egui_context.ctx_mut(), |ui| {
-        //         ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        // }).response.rect.width();
-
         egui::SidePanel::left("left_panel").default_width(300.0).resizable(true).show(egui_context.ctx_mut(), |ui| {
-                ui.heading("Menu");
+                ui.heading("Terrust - a terrain generator");
 
                 ui.horizontal(|ui| {
-                        if ui.button("Flush chunks").clicked() {
-                                chunks.flush(query, commands);
-                        }
+                        ui.label("Render distance in chunks");
                 });
 
-                ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=64).text("Render distance (chunks)"));
-                if ui.button("Increment").clicked() {
-                        ui_state.render_distance += 1;
+                
+                ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=8));
+                ui.horizontal(|ui| {
+                        if ui.button("-").clicked() {
+                                println!("Chunk -1");
+                                ui_state.render_distance += 1;
+                        }
+                        if ui.button("+").clicked() {
+                                println!("Chunk +1");
+                                ui_state.render_distance += 1;
+                        }
+                });
+                ui.allocate_space(egui::Vec2::new(0.0, 50.0));
+
+                if ui.button("Flush chunks").clicked() {
+                        println!("Flush button.");
+                        chunks.flush(query, commands);
                 }
+
+                ui.label(format!("({}, {})", ui_state.int_location.0.to_string(), ui_state.int_location.1.to_string()));
 
                 ui.allocate_space(egui::Vec2::new(0.0, 50.0));
                 
                 ui.horizontal(|ui| {
                         ui.label("File Name: ");
-                        ui.text_edit_singleline(&mut ui_state.label);
+                        ui.text_edit_singleline(&mut ui_state.file_name);
                 });
 
                 ui.horizontal(|ui| {
-                        ui.button("Save").clicked();
-                        ui.button("Load").clicked();
+                        if ui.button("Save to OBJ file").clicked() {
+                                println!("Save button.");
+                                chunks.save(ui_state.int_location, ui_state.file_name.clone())
+                        };
                 });
-
-                ui.checkbox(&mut ui_state.is_window_open, "Window Is Open");
 
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
                         ui.add(egui::Hyperlink::from_label_and_url(
-                                "powered by egui",
-                                "https://github.com/emilk/egui/",
+                                "This project is available on github",
+                                "https://github.com/idf3da/terrust/",
                         ));
                 });
 
@@ -97,5 +108,5 @@ pub fn update_camera_transform_system (
                 (0.0 - left_taken) * frustum_width * 0.5,
                 (0.0) * frustum_height * 0.5,
                 0.0,
-                ));
+        ));
 }

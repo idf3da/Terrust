@@ -29,15 +29,16 @@ use bevy_egui::{EguiPlugin};
 const CAMERA_TARGET: Vec3 = Vec3::ZERO;
 struct OriginalCameraTransform(Transform);
 
-const S: u32 = 9;
+const S: u32 = 8;
 const CHUNK_RES: (u32, u32) = (2 << S, 2 << S);
-const CHUNK_MAX_NUM: (u32, u32) = (1024, 1024);
+const CHUNK_MAX_NUM: (u32, u32) = (64, 64);
 const SCALE: f32 = (S * S * 100) as f32;
 const RENDER_DISTANCE: u32 = 16;
 const PERLIN_HEIGHT_SCALE: f64 = 40.0;
 const PERLIN_FREQ: f64 = 0.0009765625 * 8.0;
 
 fn main() {
+	println!("Starting!");
 	App::new()
 		.add_plugins(DefaultPlugins)
 		.insert_resource(WindowDescriptor {

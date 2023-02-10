@@ -19,10 +19,10 @@ pub fn gen_skybox() -> bevy::prelude::Mesh {
 	return skybox_mesh
 }
 
-pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32)) -> Mesh {
+pub fn gen_ter_mesh(size: (u32, u32), pos: (f32, f32), layers: Vec<[i32; 3]>) -> Mesh {
 
         let mut mesh = Mesh::new(bevy::render::mesh::PrimitiveTopology::TriangleList);
-        let pos = gen_perlin(size, pos);
+        let pos = gen_perlin(size, pos, layers);
         mesh.set_indices(Some(bevy::render::mesh::Indices::U32(generate_indicies(size))));
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos.clone());
         // mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, generate_normals(size, pos.clone()));

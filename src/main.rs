@@ -34,8 +34,8 @@ const CHUNK_RES: (u32, u32) = (2 << S, 2 << S);
 const CHUNK_MAX_NUM: (u32, u32) = (64, 64);
 const SCALE: f32 = (S * S * 100) as f32;
 const RENDER_DISTANCE: u32 = 16;
-const PERLIN_HEIGHT_SCALE: f64 = 40.0;
-const PERLIN_FREQ: f64 = 0.0009765625 * 8.0;
+const PERLIN_HEIGHT_SCALE: f64 = 2.0;
+const PERLIN_FREQ: f64 = 0.0009765625;
 
 fn main() {
 	println!("Starting!");
@@ -50,7 +50,8 @@ fn main() {
 		.add_plugin(EguiPlugin)
 		.add_system(ui_example_system)
 		.init_resource::<UiState>()
-		// .init_resource::<OccupiedScreenSpace>()
+		.add_startup_system(ui_state_defaults)
+		// .init_reource::<OccupiedScreenSpace>()
         	// .add_system(update_camera_transform_system)
 		.insert_resource(WgpuSettings {
 			features: WgpuFeatures::POLYGON_MODE_LINE,
@@ -69,7 +70,7 @@ fn main() {
 		.add_startup_system(chunks_init)
 		// .add_system(move_camera)
 		.add_system(chunks_update_sys)
-		.add_system(chunk_timed_flush)
+		// .add_system(chunk_timed_flush)
 		.run();
 }
 

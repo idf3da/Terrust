@@ -170,7 +170,7 @@ pub fn chunks_update_sys (
                 for near_int_coordinates in chunks_load_near(int_coordinates, ui_state.render_distance) {
                         let idx = (near_int_coordinates.0 + near_int_coordinates.1 * CHUNK_MAX_NUM.1 as i32) as usize;
                         if chunks.chunks[idx].display == false {
-                                let ChunkMesh = meshgen::gen_ter_mesh(CHUNK_RES, (near_int_coordinates.0 as f32 * CHUNK_RES.0 as f32, near_int_coordinates.1 as f32 * CHUNK_RES.1 as f32));
+                                let ChunkMesh = meshgen::gen_ter_mesh(CHUNK_RES, (near_int_coordinates.0 as f32 * CHUNK_RES.0 as f32, near_int_coordinates.1 as f32 * CHUNK_RES.1 as f32), ui_state.layers.clone());
                                 commands.spawn_bundle(PbrBundle {
                                         mesh: meshes.add(ChunkMesh.clone()),
                                         transform: Transform::from_scale(Vec3::splat(SCALE / CHUNK_RES.0 as f32)).with_translation(Vec3{x: near_int_coordinates.0 as f32 * SCALE, y: 0.0, z: near_int_coordinates.1 as f32 * SCALE}),

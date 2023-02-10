@@ -18,9 +18,43 @@ pub struct UiState {
         file_name: String,
         pub render_distance: u32,
         pub int_location: (u32, u32),
+        pub layers: Vec<[i32; 3]>,
+        l1s: i32,
+        l1h: i32,
+        l1e: bool,
+        l2s: i32,
+        l2h: i32,
+        l2e: bool,
+        l3s: i32,
+        l3h: i32,
+        l3e: bool,
+        l4s: i32,
+        l4h: i32,
+        l4e: bool,
         egui_texture_handle: Option<egui::TextureHandle>,
 }
 
+pub fn ui_state_defaults(
+        mut ui_state: ResMut<UiState>
+) {
+        ui_state.render_distance = 3;
+        
+        ui_state.l1s = 7;
+        ui_state.l1h = 40;
+        ui_state.l1e = true;
+
+        ui_state.l2s = 14;
+        ui_state.l2h = 20;
+        ui_state.l2e = true;
+
+        ui_state.l3s = 21;
+        ui_state.l3h = 10;
+        ui_state.l3e = true;
+
+        ui_state.l4s = 28;
+        ui_state.l4h = 5;
+        ui_state.l4e = true;
+}
 // TODO: When custom camera controls enable perspective shift
 pub fn ui_example_system(
         mut egui_context: ResMut<EguiContext>,
@@ -40,8 +74,8 @@ pub fn ui_example_system(
                 });
 
                 
-                ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=8));
                 ui.horizontal(|ui| {
+                        ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=8));
                         if ui.button("-").clicked() {
                                 println!("Chunk -1");
                                 ui_state.render_distance += 1;
@@ -53,9 +87,48 @@ pub fn ui_example_system(
                 });
                 ui.allocate_space(egui::Vec2::new(0.0, 50.0));
 
-                if ui.button("Flush chunks").clicked() {
+                ui.horizontal(|ui| {
+                        ui.label("Perlin layers (frequency | height | enable)");
+                });
+
+                ui.horizontal(|ui| {
+                        ui.label("#1");
+                        ui.add(egui::Slider::new(&mut ui_state.l1s, 0..=64));
+                        ui.add(egui::Slider::new(&mut ui_state.l1h, 0..=64));
+                        ui.checkbox(&mut ui_state.l1e, "");
+                });
+
+                ui.horizontal(|ui| {
+                        ui.label("#2");
+                        ui.add(egui::Slider::new(&mut ui_state.l2s, 0..=64));
+                        ui.add(egui::Slider::new(&mut ui_state.l2h, 0..=64));
+                        ui.checkbox(&mut ui_state.l2e, "");
+                });
+
+                ui.horizontal(|ui| {
+                        ui.label("#3");
+                        ui.add(egui::Slider::new(&mut ui_state.l3s, 0..=64));
+                        ui.add(egui::Slider::new(&mut ui_state.l3h, 0..=64));
+                        ui.checkbox(&mut ui_state.l3e, "");
+                });
+
+                ui.horizontal(|ui| {
+                        ui.label("#4");
+                        ui.add(egui::Slider::new(&mut ui_state.l4s, 0..=64));
+                        ui.add(egui::Slider::new(&mut ui_state.l4h, 0..=64));
+                        ui.checkbox(&mut ui_state.l4e, "");
+                });
+                ui.allocate_space(egui::Vec2::new(0.0, 50.0));
+
+                if ui.button("Reload chunks").clicked() {
                         println!("Flush button.");
                         chunks.flush(query, commands);
+                        ui_state.layers = vec![
+                                [ui_state.l1s, ui_state.l1h, if ui_state.l1e {1} else {0}],
+                                [ui_state.l2s, ui_state.l2h, if ui_state.l2e {1} else {0}],
+                                [ui_state.l3s, ui_state.l3h, if ui_state.l3e {1} else {0}],
+                                [ui_state.l4s, ui_state.l4h, if ui_state.l4e {1} else {0}]
+                        ]
                 }
 
                 ui.label(format!("({}, {})", ui_state.int_location.0.to_string(), ui_state.int_location.1.to_string()));

@@ -1,15 +1,15 @@
 [package]
 name = "terrust"
-version = "0.1.0"
+version = "0.1.5"
 edition = "2021"
 
 [dependencies]
-# bevy = { version = "*", features = ["wayland"] }
-bevy = "*"
+bevy = { version = "*", features = ["wayland"] }
+# bevy = "*"
 bevy_egui = "*"
 rand = "*"
 bevy_flycam = "*"
-noise = "0.7"
+noise = "*"
 bevy_atmosphere = "*"
 meshx = "*"
 

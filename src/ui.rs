@@ -4,15 +4,7 @@ use bevy::{prelude::*, render::camera::Projection};
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use crate::chunk::*;
 
-#[derive(Default)]
-pub struct OccupiedScreenSpace {
-        pub left: f32,
-}
-
-const CAMERA_TARGET: Vec3 = Vec3::ZERO;
-
-pub struct OriginalCameraTransform(Transform);
-
+// Shared UiState, stores all UI values
 #[derive(Default)]
 pub struct UiState {
         file_name: String,
@@ -34,6 +26,8 @@ pub struct UiState {
         egui_texture_handle: Option<egui::TextureHandle>,
 }
 
+
+// Pre-set defaults for UiState
 pub fn ui_state_defaults(
         mut ui_state: ResMut<UiState>
 ) {
@@ -56,15 +50,12 @@ pub fn ui_state_defaults(
         ui_state.l4e = true;
 }
 // TODO: When custom camera controls enable perspective shift
-pub fn ui_example_system(
+pub fn ui_system(
         mut egui_context: ResMut<EguiContext>,
         mut ui_state: ResMut<UiState>,
-        mut rendered_texture_id: Local<egui::TextureId>,
         mut query: Query<Entity, With<MeshIndicator>>, 
         mut commands: Commands,
         mut chunks: ResMut<ChunksResource>,
-        mut is_initialized: Local<bool>,
-        // mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
 ) {
         egui::SidePanel::left("left_panel").default_width(300.0).resizable(true).show(egui_context.ctx_mut(), |ui| {
                 ui.heading("Terrust - a terrain generator");
@@ -77,11 +68,9 @@ pub fn ui_example_system(
                 ui.horizontal(|ui| {
                         ui.add(egui::Slider::new(&mut ui_state.render_distance, 1..=8));
                         if ui.button("-").clicked() {
-                                println!("Chunk -1");
                                 ui_state.render_distance += 1;
                         }
                         if ui.button("+").clicked() {
-                                println!("Chunk +1");
                                 ui_state.render_distance += 1;
                         }
                 });
@@ -120,6 +109,7 @@ pub fn ui_example_system(
                 });
                 ui.allocate_space(egui::Vec2::new(0.0, 50.0));
 
+                // Reloads chunks by flushing all of them, chunk_update_system immidiatelly regenerates them
                 if ui.button("Reload chunks").clicked() {
                         println!("Flush button.");
                         chunks.flush(query, commands);
@@ -142,7 +132,7 @@ pub fn ui_example_system(
 
                 ui.horizontal(|ui| {
                         if ui.button("Save to OBJ file").clicked() {
-                                println!("Save button.");
+                                println!("Save button pressed.");
                                 chunks.save(ui_state.int_location, ui_state.file_name.clone())
                         };
                 });
@@ -156,30 +146,4 @@ pub fn ui_example_system(
 
                 ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
         });
-}
-
-pub fn update_camera_transform_system (
-        occupied_screen_space: Res<crate::ui::OccupiedScreenSpace>,
-        original_camera_transform: Res<OriginalCameraTransform>,
-        windows: Res<Windows>,
-        mut camera_query: Query<(&Projection, &mut Transform)>,
-) {
-        let (camera_projection, mut transform) = match camera_query.get_single_mut() {
-                Ok((Projection::Perspective(projection), transform)) => (projection, transform),
-                _ => unreachable!(),
-        };
-
-        let distance_to_target = (CAMERA_TARGET - original_camera_transform.0.translation).length();
-        let frustum_height = 2.0 * distance_to_target * (camera_projection.fov * 0.5).tan();
-        let frustum_width = frustum_height * camera_projection.aspect_ratio;
-
-        let window = windows.get_primary().unwrap();
-
-        let left_taken = occupied_screen_space.left / window.width();
-        transform.translation = original_camera_transform.0.translation
-                + transform.rotation.mul_vec3(Vec3::new(
-                (0.0 - left_taken) * frustum_width * 0.5,
-                (0.0) * frustum_height * 0.5,
-                0.0,
-        ));
 }

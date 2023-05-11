@@ -1,30 +1,13 @@
 use bevy::prelude::*;
 use crate::meshgen;
 
-#[derive(Component)]
-struct ViewportCamera;
-
-#[derive(Component)]
-struct OverheadCamera;
-
-
-// TODO: Add marker for left/right camera through queries
-pub fn spawn_viewport(mut commands: Commands) {
-        commands.spawn_bundle(
-                Camera3dBundle {
-                        transform: Transform::from_xyz(0.0, 200.0, -100.0).looking_at(Vec3::ZERO, Vec3::Y),
-                        ..default()
-                },
-        );
-}
-
 pub fn basic_scene(
-        mut commands: Commands, 
-        mut meshes: ResMut<Assets<Mesh>>, 
-        asset_server: Res<AssetServer>, 
-        mut materials: ResMut<Assets<StandardMaterial>>
+	mut commands: Commands, 
+	mut meshes: ResMut<Assets<Mesh>>, 
+	asset_server: Res<AssetServer>, 
+	mut materials: ResMut<Assets<StandardMaterial>>
 ) {
-        // Global light
+	// Global light
 	commands.spawn_bundle(DirectionalLightBundle {
 		directional_light: DirectionalLight {
 			illuminance: 30000.0,
@@ -35,14 +18,14 @@ pub fn basic_scene(
 		..default()
 	});
 
-        let skybox_box = meshes.add(meshgen::gen_skybox());
-        let texture_handle = asset_server.load("textures/sky.png");
+	let skybox_box = meshes.add(meshgen::gen_skybox());
+	let texture_handle = asset_server.load("textures/sky.png");
 
 	// Skybox material
 	let material_handle = materials.add(StandardMaterial {
 		base_color_texture: Some(texture_handle.clone()),
 		alpha_mode: AlphaMode::Blend,
-		unlit: true,
+		unlit: true, // Does not cast shadows
 		..default()
 	});
 
@@ -61,7 +44,7 @@ pub fn basic_scene(
 		})),
 		material: materials.add(StandardMaterial {
 			base_color: Color::rgba(0.35, 0.55, 0.85, 0.733),
-			alpha_mode: AlphaMode::Blend,
+			alpha_mode: AlphaMode::Blend, // Prevents clipping outside of terrain area
 			unlit: true,
 			..default()
 		}),

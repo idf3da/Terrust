@@ -1,5 +1,5 @@
 # Terrust
-- Terrain generator written a part of the 2023 NEA A-Levels examination.
+- Terrain generator written as a part of the 2023 NEA A-Levels examination.
 - I used Rust and Bevy.
 - The submited paper got me an A
 - Video demonstration available on YT:
